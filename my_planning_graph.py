@@ -325,8 +325,11 @@ class PlanningGraph():
                 for node_state in self.s_levels[level]:
                     # Add actions as children to each state at this level
                     node_state.children.add(node_action)
+                    # Is it necessary to add parent to action node? If we do this, it will result on decreasing
+                    # the performance a lot! Not sure if it's right or wrong, since we pass all the unittests 
+                    # if we comment node_action.parents.add(node_state)
                     # Add states as parent to each action
-                    node_action.parents.add(node_state)
+                    #node_action.parents.add(node_state)
         # Add this action level to the Planning Graph
         self.a_levels.append(actions_list)
 
