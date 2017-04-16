@@ -420,6 +420,17 @@ class PlanningGraph():
         :return: bool
         '''
         # TODO test for Inconsistent Effects between nodes
+        # node_a1's (+) effects can't be canceled by node_a2's (-) effects
+        for effect in node_a1.action.effect_add:
+            if effect in node_a2.action.effect_rem:
+                # If so, return True
+                return True
+
+        # node_a2's (+) effects can't be canceled by node_a1's (-) effects
+        for effect in node_a2.action.effect_add:
+            if effect in node_a1.action.effect_rem:
+                # If so, return True
+                return True
         return False
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -437,6 +448,26 @@ class PlanningGraph():
         :return: bool
         '''
         # TODO test for Interference between nodes
+        # Return True if any node_a1's (+) effect is the negation of a precondition of the node_a2.
+        for effect in node_a1.action.effect_add:
+            if effect in node_a2.action.precond_neg:
+                return True
+
+        # Return True if any node_a2's (+) effect is the negation of a precondition of the node_a1.
+        for effect in node_a2.action.effect_add:
+            if effect in node_a1.action.precond_neg:
+                return True
+        
+        # Return True if any node_a1's (-) effect is the negation of a precondition of the node_a2.
+        for effect in node_a1.action.effect_rem:
+            if effect in node_a2.action.precond_pos:
+                return True
+
+        # Return True if any node_a2's (-) effect is the negation of a precondition of the node_a1.
+        for effect in node_a2.action.effect_rem:
+            if effect in node_a1.action.precond_pos:
+                return True
+
         return False
 
     def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -451,6 +482,11 @@ class PlanningGraph():
         '''
 
         # TODO test for Competing Needs between nodes
+        for precon_node_a1 in node_a1.parents:
+            for precon_node_a2 in node_a2.parents:
+                if precon_node_a1.is_mutex(precon_node_a2):
+                    return True
+
         return False
 
     def update_s_mutex(self, nodeset: set):
