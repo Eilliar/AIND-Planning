@@ -312,6 +312,24 @@ class PlanningGraph():
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
 
+        actions_list = []
+        # Iterate over all actions
+        for a in self.all_actions:
+            # For this action a, build a Planning Graph Node
+            node_action = PgNode_a(a)
+            # Check if all prerequisite literals for this action hold on current state level
+            if node_action.prenodes.issubset(self.s_levels[level]):
+                # if so, add this action to possible actions
+                actions_list.append(node_action)
+                
+                for node_state in self.s_levels[level]:
+                    # Add actions as children to each state at this level
+                    node_state.children.add(node_action)
+                    # Add states as parent to each action
+                    node_action.parents.add(node_state)
+        # Add this action level to the Planning Graph
+        self.a_levels.append(actions_list)
+
     def add_literal_level(self, level):
         ''' add an S (literal) level to the Planning Graph
 
@@ -329,6 +347,21 @@ class PlanningGraph():
         #   may be "added" to the set without fear of duplication.  However, it is important to then correctly create and connect
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
+
+        # Must work with sets to be able to add without duplication
+        states_list = set()
+        # Iterate over actions from previous level
+        for a in self.a_levels[level-1]:
+            # Check effect nodes
+            for node_state in a.effnodes:
+                # Add this effect node to the set of state nodes
+                states_list.add(node_state)
+                # Add the action as parent for this state node
+                node_state.parents.add(a)
+                # Add the state node as children to the action node
+                a.children.add(node_state)
+        # Add this state level to the Planning Graph
+        self.s_levels.append(states_list)
 
     def update_a_mutex(self, nodeset):
         ''' Determine and update sibling mutual exclusion for A-level nodes
