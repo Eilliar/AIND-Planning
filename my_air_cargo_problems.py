@@ -215,6 +215,15 @@ class AirCargoProblem(Problem):
         '''
         # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
         count = 0
+        # Key information on: https://discussions.udacity.com/t/understanding-ignore-precondition-heuristic/225906/2
+        # " What is the minimum number of actions you'll need to to take to satisfy all your goals?"
+        # With this in mind, maybe we can use a modified version of goal_test() to count the number of unsatified goals?
+        kb = PropKB()
+        
+        kb.tell(decode_state(node.state, self.state_map).pos_sentence())
+        for clause in self.goal:
+            if clause not in kb.clauses:
+                count += 1
         return count
 
 
@@ -278,17 +287,17 @@ def air_cargo_p3() -> AirCargoProblem:
     expr('At(C3, ATL)'), 
     expr('At(C4, ORD)'),
     expr('At(P1, SFO)'),
-    exp('At(P2, JFK)')]
+    expr('At(P2, JFK)')]
     neg = [expr('At(C1, JFK)'), expr('At(C1, ATL)'), expr('At(C1, ORD)'), 
     expr('At(C2, SFO)'), expr('At(C2, ALT)'), expr('At(C2, ORD)'),
     expr('At(C3, JFK)'), expr('At(C3, SFO)'), expr('At(C3, ORD)'),
     expr('At(C4, JFK)'), expr('At(C4, SFO)'), expr('At(C4, ALT)'),
-    expr('In(C1, P1'), expr('In(C1, P2'),
-    expr('In(C2, P1'), expr('In(C2, P2'),
-    expr('In(C3, P1'), expr('In(C3, P2'),
-    expr('In(C4, P1'), expr('In(C4, P2'),
+    expr('In(C1, P1)'), expr('In(C1, P2)'),
+    expr('In(C2, P1)'), expr('In(C2, P2)'),
+    expr('In(C3, P1)'), expr('In(C3, P2)'),
+    expr('In(C4, P1)'), expr('In(C4, P2)'),
     expr('At(P1, JFK)'), expr('At(P1, ATL)'), expr('At(P1, ORD)'),
-    exp('At(P2, SFO)'), exp('At(P2, ATL)'), exp('At(P2, ORD)')]
+    expr('At(P2, SFO)'), expr('At(P2, ATL)'), expr('At(P2, ORD)')]
     init = FluentState(pos, neg)
     goal = [expr('At(C1, JFK)'), expr('At(C3, JFK)'), expr('At(C2, SFO)'), expr('At(C4, SFO)')]
 
